@@ -5,14 +5,13 @@ const cors = require('cors');
 const routes = require('./src/routes');
 
 const corsOptions = {
-    origin: 'https://multishow-associados.web.app/',
+    origin: 'https://multishow-associados.web.app',  // URL da sua aplicação Flutter
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: 'Content-Type, Authorization',
 };
 
-app.use(cors(corsOptions));
-app.options(/^\/.*$/, cors());
-
+app.use(cors(corsOptions));  // Aplica o CORS com as opções definidas
+app.options('*', cors());  // Trata as requisições OPTIONS
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

@@ -5,9 +5,9 @@ const cors = require('cors');
 const routes = require('./src/routes');
 
 const corsOptions = {
-    origin: 'https://multishow-associados.web.app/, *',
+    origin: 'https://multishow-associados.web.app/',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: 'Content-Type, Authorization',
+    allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 app.use(cors(corsOptions));

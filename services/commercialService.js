@@ -1,0 +1,148 @@
+const pool = require("../db");
+
+/**
+ * Cria uma ação comercial
+ * @param {string} description - Descrição da ação
+ * @param {string} month - Mês da ação (1 a 12)
+ * @param {string} notes - Observações adicionais
+ */
+const createCommercial = async (description, month, year) => {
+
+
+  const existingAction = await pool.query(
+    "SELECT * FROM commercial_actions WHERE description = $1 AND month = $2 and year = $3",
+    [description, month, year]
+  );
+
+  console.log("existingAction", existingAction.rows);
+  if (existingAction.rows.length > 0) {
+    return existingAction.rows[0];
+  } else {
+    const result = await pool.query("INSERT INTO commercial_actions (description, month, notes, year) VALUES ($1, $2, $3, $4) RETURNING *",
+      [description, month, "", year]);
+    return result.rows[0];
+  }
+
+
+};
+
+const readCommercial = async (id) => {
+  try {
+    const result = await pool.query("SELECT * FROM commercial_actions where id = $1", [id]);
+    return result.rows;
+  } catch (err) {
+    console.error("Error reading commercial actions: ", err);
+    return { error: err.message };
+  }
+}
+
+const readCommercialAssociates = async (id) => {
+  try {
+    const result = await pool.query("SELECT a.id, a.name, a.cnpj, SUM(capa.total_price) AS totalvalue, COUNT(DISTINCT capa.product_id) AS numberofproducts FROM commercial_actions ca JOIN commercial_action_product_associate capa ON capa.commercial_action_id = ca.id JOIN associates a ON a.id = capa.associate_id WHERE ca.id = $1 GROUP BY  a.id, a.name, a.cnpj;", [id]);
+    return result.rows;
+  } catch (err) {
+    console.error("Error reading commercial actions: ", err);
+    return { error: err.message };
+  }
+}
+
+const readCommercialProducts = async (action) => {
+  try {
+    const result = await pool.query("SELECT a.cnpj,  a.name AS associatename,  p.*, SUM(capa.total_price) AS total FROM commercial_actions ca JOIN commercial_action_product_associate capa ON capa.commercial_action_id = ca.id JOIN associates a ON a.id = capa.associate_id JOIN products p ON p.id = capa.product_id WHERE ca.id = $1 GROUP BY a.cnpj, a.name, p.id;", [action]);
+    return result.rows;
+  } catch (err) {
+    console.error("Error reading commercial actions: ", err);
+    return { error: err.message };
+  }
+}
+
+const readCommercialAll = async () => {
+  try {
+    const result = await pool.query("SELECT * FROM commercial_actions");
+    return result.rows;
+  } catch (err) {
+    console.error("Error reading commercial actions: ", err);
+    return { error: err.message };
+  }
+}
+
+const readAvailableMonhts = async (req) => {
+  console.log("Get Available Months");
+
+  const { year } = req.params;
+  const user = req.user;
+
+  try {
+
+    if (user.type == 2) {
+      const result = await pool.query("select ca.month from commercial_actions ca join commercial_action_product_associate capa ON  capa.commercial_action_id = ca.id join user_associate ua on ua.associate_id = capa.associate_id where ca.year = $1 and ua.user_id = $2 group by ca.month order by month desc", [year, user.id]);
+      return result.rows;
+    } else if (user.type == 0 || user.type == 1) {
+      const result = await pool.query("select month from commercial_actions ca where ca.year = $1 group by month order by month desc", [year]);
+      return result.rows;
+    }
+
+  } catch (err) {
+    console.error("Error reading commercial actions: ", err);
+    return { error: err.message };
+  }
+}
+
+const readAvailableYear = async (req) => {
+  console.log("Get Available Years");
+  const user = req.user;
+  try {
+    if (user.type == 0 || user.type == 1) {
+      const result = await pool.query("select year from commercial_actions ca group by year order by year desc");
+      return result.rows;
+
+    } else if (user.type == 2) {
+      const result = await pool.query("select ca.year from commercial_actions ca join commercial_action_product_associate capa on capa.commercial_action_id = ca.id join user_associate ua on ua.associate_id = capa.associate_id where ua.user_id = $1 group by ca.year order by ca.year desc", [user.id]);
+      return result.rows;
+    }
+  } catch (err) {
+    console.error("Error reading commercial actions: ", err);
+    return { error: err.message };
+  }
+}
+
+const readCommercialWithJoin = async (req) => {
+  console.log("Get Commercial With Join");
+
+  const { month, year } = req.params;
+  const user = req.user;
+
+  try {
+    if (user.type == 2) {
+
+      if (month != null && month != "null" && year != null && year != "null" && month != "0" && year != "0" && month != 0 && year != 0) {
+        const result = await pool.query("SELECT ca.id,ca.description,ca.month,COUNT(DISTINCT a.id) AS numberOfAssociates,COUNT(DISTINCT p.id) AS numberOfProducts,SUM(capa.total_price) AS totalValue, CASE WHEN COUNT(CASE WHEN capa.paid = true THEN 1 END) = 0 THEN 0 WHEN COUNT(CASE WHEN capa.paid = true THEN 1 END) = COUNT(capa.id) THEN 1 ELSE 2 END AS status_payment FROM commercial_actions ca JOIN commercial_action_product_associate capa ON capa.commercial_action_id = ca.id join user_associate ua on ua.associate_id = capa.associate_id JOIN associates a ON a.id = capa.associate_id JOIN products p ON p.id = capa.product_id WHERE ca.month = $1 AND ca.year = $2 and ua.user_id = $3 GROUP BY ca.id, ca.description, ca.month ORDER BY ca.month DESC;", [month, year, user.id]);
+        return result.rows;
+
+      } else {
+        const result = await pool.query("SELECT ca.id,ca.description,ca.month,COUNT(DISTINCT a.id) AS numberOfAssociates,COUNT(DISTINCT p.id) AS numberOfProducts,SUM(capa.total_price) AS totalValue, CASE WHEN COUNT(CASE WHEN capa.paid = true THEN 1 END) = 0 THEN 0 WHEN COUNT(CASE WHEN capa.paid = true THEN 1 END) = COUNT(capa.id) THEN 1 ELSE 2 END AS status_payment FROM commercial_actions ca JOIN commercial_action_product_associate capa ON capa.commercial_action_id = ca.id join user_associate ua on ua.associate_id = capa.associate_id JOIN associates a ON a.id = capa.associate_id JOIN products p ON p.id = capa.product_id where ua.user_id = $1 GROUP BY ca.id, ca.description, ca.month ORDER BY ca.month DESC;", [user.id]);
+        return result.rows;
+      }
+
+    } else if (user.type == 0 || user.type == 1) {
+
+      if (month != null && month != "null" && year != null && year != "null" && month != "0" && year != "0" && month != 0 && year != 0) {
+        const result = await pool.query("SELECT ca.id,ca.description,ca.month,COUNT(DISTINCT a.id) AS numberOfAssociates,COUNT(DISTINCT p.id) AS numberOfProducts,SUM(capa.total_price) AS totalValue FROM commercial_actions ca JOIN commercial_action_product_associate capa ON capa.commercial_action_id = ca.id JOIN associates a ON a.id = capa.associate_id JOIN products p ON p.id = capa.product_id WHERE ca.month = $1 AND ca.year = $2 GROUP BY ca.id, ca.description, ca.month ORDER BY ca.month DESC;", [month, year]);
+        return result.rows;
+
+      } else {
+        const result = await pool.query("SELECT ca.id,ca.description,ca.month,COUNT(DISTINCT a.id) AS numberOfAssociates,COUNT(DISTINCT p.id) AS numberOfProducts,SUM(capa.total_price) AS totalValue FROM commercial_actions ca JOIN commercial_action_product_associate capa ON capa.commercial_action_id = ca.id JOIN associates a ON a.id = capa.associate_id JOIN products p ON p.id = capa.product_id GROUP BY ca.id, ca.description, ca.month ORDER BY ca.month DESC;");
+        return result.rows;
+      }
+
+    }
+  } catch (err) {
+    console.error("Error reading commercial actions: ", err);
+    return { error: err.message };
+  }
+}
+
+module.exports = {
+  createCommercial, readCommercial, readCommercialAll, readCommercialWithJoin, readCommercialAssociates
+  , readCommercialProducts, readAvailableMonhts, readAvailableYear
+};

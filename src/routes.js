@@ -25,7 +25,7 @@ router.get('/commercial-actions', authMiddleware, commercial.readCommercialActio
 router.get('/available-months/:year', authMiddleware, commercial.readAvailableMonhts);
 router.get('/available-years', authMiddleware, commercial.readAvailableYear);
 router.get('/commercial-actions/:id', authMiddleware, commercial.readCommercialActionDetails);
-router.get('/commercial-actions-with-join/:month/:year', authMiddleware, commercial.readCommercialActionsWithJoin);
+router.get('/commercial-actions-with-join/:month/:year/:company', authMiddleware, commercial.readCommercialActionsWithJoin);
 router.get('/commercial-action-associates/:id', authMiddleware, commercial.readCommercialActionAssociates);
 router.get('/commercial-action-products/:action', authMiddleware, commercial.readCommercialActionProducts);
 
@@ -36,8 +36,8 @@ router.post('/payments-associate-additional-info', authMiddleware, payments.crea
 router.put('/payments-associate/:associate/:invoice/:oldInvoice', authMiddleware, payments.updatePaymentsInvoiceAssociate);
 router.get('/payments-actions/:associate/:month/:year', authMiddleware, payments.readPaymentsActions);
 router.get('/payments-action-products/:associate/:action', authMiddleware, payments.readPaymentsActionsProducts);
-router.get('/payments-financial-summary/:month/:year', authMiddleware, payments.readFinancialSummary);
-router.get('/payments-financial-summary-graph/:year', authMiddleware, payments.readFinancialSummaryGraph);
+router.get('/payments-financial-summary/:month/:year/:company', authMiddleware, payments.readFinancialSummary);
+router.get('/payments-financial-summary-graph/:year/:company', authMiddleware, payments.readFinancialSummaryGraph);
 
 
 module.exports = router;

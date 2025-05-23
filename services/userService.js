@@ -82,6 +82,8 @@ const getAssociateByUser = async (req) => {
     const { user } = req;
     const { user_id } = req.params;
 
+    console.log("user_id", user_id);
+
     if (user_id != "null" && user_id != null) {
         console.log("STEP 1")
         const result = await pool.query(`select *, '0' as "numberofproducts", 0.0 as "totalvalue"  from associates a join user_associate ua on ua.associate_id = a.id where ua.user_id = $1`, [user_id]);

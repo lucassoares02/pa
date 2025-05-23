@@ -4,6 +4,7 @@ const user = require('../controllers/userController');
 const login = require('../controllers/loginController');
 const commercial = require('../controllers/commercialController');
 const payments = require('../controllers/paymentsController');
+const mailer = require('../controllers/maillerController');
 const authMiddleware = require('../src/middlewares/middleware');
 
 
@@ -39,6 +40,8 @@ router.get('/payments-actions/:associate/:month/:year', authMiddleware, payments
 router.get('/payments-action-products/:associate/:action', authMiddleware, payments.readPaymentsActionsProducts);
 router.get('/payments-financial-summary/:month/:year/:company', authMiddleware, payments.readFinancialSummary);
 router.get('/payments-financial-summary-graph/:year/:company', authMiddleware, payments.readFinancialSummaryGraph);
+
+router.post('/send-email', authMiddleware, mailer.sendEmail);
 
 
 module.exports = router;

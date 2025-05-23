@@ -4,6 +4,7 @@ const app = express();
 const cors = require('cors');
 const routes = require('./src/routes');
 
+// UPDATE CORS
 const corsOptions = {
     origin: `${process.env.ORIGIN}`,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

@@ -7,10 +7,7 @@ const pool = require("../db");
  */
 const createAssociate = async (cnpj, name) => {
 
-  const existingAssociate = await pool.query(
-    "SELECT * FROM associates WHERE cnpj = $1 AND name = $2",
-    [cnpj, name]
-  );
+  const existingAssociate = await pool.query(`SELECT * FROM associates WHERE cnpj like '%` + cnpj + `%';`);
   if (existingAssociate.rows.length > 0) {
     return existingAssociate.rows[0];
   } else {

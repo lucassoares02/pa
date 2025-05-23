@@ -49,9 +49,13 @@ const readPaymentsActionsProducts = async (req, res) => {
 
     const { associate, action } = req.params;
 
+    console.log("Associate: ", associate);
+    console.log("Action: ", action);
+
     try {
-        if (associate == "null" || associate == null) {
+        if (associate == "0" || associate == 0) {
             const response = await userController.findAssociateByUser(req, res);
+            console.log("Response: ", response);
             if (response) {
                 const result = await paymentsService.readPaymentsActionsProducts(response.id, action);
                 res.status(200).json(result);

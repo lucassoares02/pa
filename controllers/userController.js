@@ -16,11 +16,24 @@ exports.getAllUsers = async (req, res) => {
 // Create a new user
 exports.createUser = async (req, res) => {
     console.log("Create User");
-    const { name, email, password } = req.body;
+    const { id, name, email, type, associates } = req.body;
+    const password = req.body.password || null;
     try {
-        const result = await userService.createUser(name, email, password);
-        res.status(201).json(result);
+        console.log("ID", id);
+        if (id != null && id != "null") {
+            const result = await userService.updateUser(id, name, email, type, associates);
+            res.status(200).json(result);
+        } else {
+            if (password != null) {
+                const result = await userService.createUser(name, email, password);
+                res.status(201).json(result);
+            } else {
+                const result = await userService.registerUser(name, email, type, associates);
+                res.status(201).json(result);
+            }
+        }
     } catch (err) {
+        console.error("Error creating user:", err);
         res.status(500).json({ error: err.message });
     }
 };
@@ -39,9 +52,8 @@ exports.findAssociateByUser = async (req, res) => {
 
 exports.getAssociateByUser = async (req, res) => {
     console.log("Get Associate by User");
-    const { user } = req;
     try {
-        const result = await userService.getAssociateByUser(user.id);
+        const result = await userService.getAssociateByUser(req);
         res.status(200).json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });

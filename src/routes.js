@@ -16,18 +16,19 @@ router.post('/signin', login.signin);
 
 // USER
 router.get('/users', authMiddleware, user.getAllUsers);
-router.get('/associates', authMiddleware, user.getAssociateByUser);
+router.get('/associates/:user_id', authMiddleware, user.getAssociateByUser);
 router.post('/users', authMiddleware, user.createUser);
 
 // COMMERCIAL ACTIONS
 router.post('/commercial-action', authMiddleware, commercial.createCommercialAction);
 router.get('/commercial-actions', authMiddleware, commercial.readCommercialActions);
-router.get('/available-months/:year', authMiddleware, commercial.readAvailableMonhts);
-router.get('/available-years', authMiddleware, commercial.readAvailableYear);
+router.get('/available-months/:year/:company', authMiddleware, commercial.readAvailableMonhts);
+router.get('/available-years/:company', authMiddleware, commercial.readAvailableYear);
 router.get('/commercial-actions/:id', authMiddleware, commercial.readCommercialActionDetails);
 router.get('/commercial-actions-with-join/:month/:year/:company', authMiddleware, commercial.readCommercialActionsWithJoin);
 router.get('/commercial-action-associates/:id', authMiddleware, commercial.readCommercialActionAssociates);
 router.get('/commercial-action-products/:action', authMiddleware, commercial.readCommercialActionProducts);
+router.get('/commercial-actions-top-associates/:year', authMiddleware, commercial.readTopAssociates);
 
 // PAYMENTS 
 router.get('/payments-associates/:month/:year', authMiddleware, payments.readPaymentsAssociates);

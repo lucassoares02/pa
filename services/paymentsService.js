@@ -104,7 +104,7 @@ const getFinancialSummary = async (req) => {
             FROM commercial_action_product_associate capa
             JOIN commercial_actions ca ON capa.commercial_action_id = ca.id
             join user_associate ua on ua.associate_id = capa.associate_id
-            WHERE ($1::integer IS NULL OR ca.year = $1::integer) and ua.user_id = $2` + (company != "0" ? ` and ua.associate_id = $4` : ``) + `
+            WHERE ($1::integer IS NULL OR ca.year = $1::integer) and ua.user_id = $2` + (company != "0" ? ` and ua.associate_id = $3` : ``) + `
 
             UNION ALL
 
@@ -112,7 +112,7 @@ const getFinancialSummary = async (req) => {
             FROM commercial_action_product_associate capa
             JOIN commercial_actions ca ON capa.commercial_action_id = ca.id
             join user_associate ua on ua.associate_id = capa.associate_id
-            WHERE ($1::integer IS NULL OR ca.year = $1::integer) and ua.user_id = $2` + (company != "0" ? ` and ua.associate_id = $4` : ``) + `
+            WHERE ($1::integer IS NULL OR ca.year = $1::integer) and ua.user_id = $2` + (company != "0" ? ` and ua.associate_id = $3` : ``) + `
 
             UNION ALL
 
@@ -120,7 +120,7 @@ const getFinancialSummary = async (req) => {
             FROM commercial_action_product_associate capa
             JOIN commercial_actions ca ON capa.commercial_action_id = ca.id
             join user_associate ua on ua.associate_id = capa.associate_id
-            WHERE ($1::integer IS NULL OR ca.year = $1::integer) and ua.user_id = $2` + (company != "0" ? ` and ua.associate_id = $4` : `;`) + ``, company != "0" ? [year, user.id, company] : [year, user.id]);
+            WHERE ($1::integer IS NULL OR ca.year = $1::integer) and ua.user_id = $2` + (company != "0" ? ` and ua.associate_id = $3` : `;`) + ``, company != "0" ? [year, user.id, company] : [year, user.id]);
 
 
       } else {

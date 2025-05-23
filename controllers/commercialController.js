@@ -120,6 +120,18 @@ const readCommercialActionsWithJoin = async (req, res) => {
     }
 };
 
+const readTopAssociates = async (req, res) => {
+    console.log("Get Top Associates");
+
+    try {
+        const result = await commercialService.readTopAssociates(req);
+        res.status(200).json(result);
+    } catch (err) {
+        console.error("Error getting commercial actions: ", err);
+        res.status(500).json({ error: err.message });
+    }
+};
+
 const readCommercialActionAssociates = async (req, res) => {
     console.log("Get Commercial Action Associates");
 
@@ -151,5 +163,6 @@ const readCommercialActionProducts = async (req, res) => {
 
 module.exports = {
     createCommercialAction, readCommercialActions, readCommercialActionsWithJoin, readCommercialActionAssociates
-    , readCommercialActionProducts, readCommercialActionDetails, readAvailableMonhts, readAvailableYear
+    , readCommercialActionProducts, readCommercialActionDetails, readAvailableMonhts, readAvailableYear, readTopAssociates
+
 };

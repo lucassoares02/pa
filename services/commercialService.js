@@ -143,12 +143,10 @@ const readCommercialWithJoin = async (req) => {
     if (user.type == 2) {
 
       if (month != null && month != "null" && year != null && year != "null" && month != "0" && year != "0" && month != 0 && year != 0) {
-        console.log("STEP 1");
         const result = await pool.query(`SELECT ca.id,ca.description, ua.associate_id as "associate_id", a.name as "associate_name", ca.month,COUNT(DISTINCT a.id) AS numberOfAssociates,COUNT(DISTINCT p.id) AS numberOfProducts,SUM(capa.total_price) AS totalValue, capa.associate_id, CASE WHEN COUNT(CASE WHEN capa.paid = true THEN 1 END) = 0 THEN 0 WHEN COUNT(CASE WHEN capa.paid = true THEN 1 END) = COUNT(capa.id) THEN 1 ELSE 2 END AS status_payment FROM commercial_actions ca JOIN commercial_action_product_associate capa ON capa.commercial_action_id = ca.id join user_associate ua on ua.associate_id = capa.associate_id JOIN associates a ON a.id = capa.associate_id JOIN products p ON p.id = capa.product_id WHERE ca.month = $1 AND ca.year = $2 and ua.user_id = $3 ` + (company != "0" ? ` and ua.associate_id = $4` : ``) + ` GROUP BY ca.id,capa.associate_id, ca.description,ua.associate_id, ca.month, a.name ORDER BY ca.month DESC`, company != "0" ? [month, year, user.id, company] : [month, year, user.id]);
         return result.rows;
 
       } else {
-        console.log("STEP 2");
         const result = await pool.query(`SELECT ca.id,ca.description, ua.associate_id as "associate_id", a.name as "associate_name", ca.month,COUNT(DISTINCT a.id) AS numberOfAssociates,COUNT(DISTINCT p.id) AS numberOfProducts,SUM(capa.total_price) AS totalValue,capa.associate_id, CASE WHEN COUNT(CASE WHEN capa.paid = true THEN 1 END) = 0 THEN 0 WHEN COUNT(CASE WHEN capa.paid = true THEN 1 END) = COUNT(capa.id) THEN 1 ELSE 2 END AS status_payment FROM commercial_actions ca JOIN commercial_action_product_associate capa ON capa.commercial_action_id = ca.id join user_associate ua on ua.associate_id = capa.associate_id JOIN associates a ON a.id = capa.associate_id JOIN products p ON p.id = capa.product_id where ua.user_id = $1 ` + (company != "0" ? ` and ua.associate_id = $2` : ``) + ` GROUP BY ca.id, ca.description,capa.associate_id, ua.associate_id, ca.month, a.name ORDER BY ca.month DESC;`, company != "0" ? [user.id, company] : [user.id]);
         return result.rows;
       }

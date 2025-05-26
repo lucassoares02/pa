@@ -106,17 +106,13 @@ const createPaymentsInvoiceAssociate = async (req, res) => {
 
     try {
         const resultPayments = await paymentsService.readPaymentsAdditionalInfo(month, year, associate, action);
-        console.log("Result Payments: ", resultPayments);
-        console.log("---------------------------");
 
         if (resultPayments.length > 0) {
-            console.log("IF");
             const result = await paymentsService.updatePaymentsAdditionalInfo(observation, invoice, payment, month, year, associate, action);
             await paymentsService.updatePaymentsAssociate(associate, invoice, action, month, year);
 
             return res.status(200).json(result);
         } else {
-            console.log("ELSE");
             const result = await paymentsService.createPaymentsAdditionalInfo(observation, invoice, payment, month, year, associate, action);
             await paymentsService.updatePaymentsAssociate(associate, invoice, action, month, year);
             return res.status(200).json(result);
@@ -143,7 +139,7 @@ const readFinancialSummary = async (req, res) => {
 
 const readFinancialSummaryGraph = async (req, res) => {
     console.log("Get Financial Summary Graph");
-    const { year } = req.params;
+
     try {
         const result = await paymentsService.getPaymentSummaryGraph(req);
         res.status(200).json(result);

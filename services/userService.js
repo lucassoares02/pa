@@ -34,13 +34,13 @@ const createUser = async (name, email, password) => {
     return result.rows[0];
 };
 
-const registerUser = async (name, email, type, associates) => {
+const registerUser = async (name, email, type, associates, randomPassword) => {
 
-    // generate a random password
-    const randomPassword = Math.random().toString(36).slice(-8);
+
+    const hashedPassword = await hashPassword(randomPassword);
     const result = await pool.query(
         'INSERT INTO users (name, email, password, type) VALUES ($1, $2, $3, $4) RETURNING *',
-        [name, email, randomPassword, type]
+        [name, email, hashedPassword, type]
     );
     if (type == 2) {
         for (let i = 0; i < associates.length; i++) {
@@ -60,7 +60,6 @@ const updateUser = async (id, name, email, type, associates) => {
         'UPDATE users SET name = $1, email = $2, type = $3 WHERE id = $4 RETURNING *',
         [name, email, type, id]
     );
-    console.log("Type", type);
     if (type == 2) {
         await pool.query(
             'DELETE FROM user_associate WHERE user_id = $1',
@@ -82,10 +81,8 @@ const getAssociateByUser = async (req) => {
     const { user } = req;
     const { user_id } = req.params;
 
-    console.log("user_id", user_id);
 
     if (user_id != "null" && user_id != null) {
-        console.log("STEP 1")
         const result = await pool.query(`select *, '0' as "numberofproducts", 0.0 as "totalvalue"  from associates a join user_associate ua on ua.associate_id = a.id where ua.user_id = $1`, [user_id]);
         return result.rows;
     } else if (user.type == 2) {

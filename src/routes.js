@@ -41,7 +41,7 @@ router.get('/payments-action-products/:associate/:action', authMiddleware, payme
 router.get('/payments-financial-summary/:month/:year/:company', authMiddleware, payments.readFinancialSummary);
 router.get('/payments-financial-summary-graph/:year/:company', authMiddleware, payments.readFinancialSummaryGraph);
 
-router.post('/send-email', authMiddleware, mailer.sendEmail);
+router.post('/send-email', mailer.sendEmail);
 
 
 module.exports = router;

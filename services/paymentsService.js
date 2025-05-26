@@ -124,7 +124,6 @@ const getFinancialSummary = async (req) => {
 
 
       } else {
-        console.log(" 4");
 
         result = await pool.query(`SELECT
             'Total' AS label,
@@ -181,9 +180,7 @@ const getFinancialSummary = async (req) => {
 
 
 
-      console.log(" 5");
       if (month != "null" && year != "null") {
-        console.log(" 6");
         result = await pool.query(`SELECT 'Total' AS label, COALESCE(SUM(capa.total_price), 0) AS value
           FROM commercial_action_product_associate capa
           JOIN commercial_actions ca ON capa.commercial_action_id = ca.id
@@ -205,7 +202,6 @@ const getFinancialSummary = async (req) => {
 
       }
       else if (year != "null" && year != null && year != 0 && year != "0") {
-        console.log(" 7");
         result = await pool.query(`SELECT 'Total' AS label, COALESCE(SUM(capa.total_price), 0) AS value
           FROM commercial_action_product_associate capa
           JOIN commercial_actions ca ON capa.commercial_action_id = ca.id
@@ -226,7 +222,6 @@ const getFinancialSummary = async (req) => {
           WHERE ($1::integer IS NULL OR ca.year = $1::integer);`, [year]);
 
       } else {
-        console.log(" 8");
         result = await pool.query(`SELECT 'Total' AS label, COALESCE(SUM(capa.total_price), 0) AS value
           FROM commercial_action_product_associate capa
           JOIN commercial_actions ca ON capa.commercial_action_id = ca.id
@@ -312,7 +307,7 @@ const getPaymentSummaryGraph = async (req) => {
         const result = await pool.query(`select ca.year, capa.month, SUM(capa.total_price) AS value FROM commercial_action_product_associate AS capa JOIN commercial_actions AS ca ON ca.id = capa.commercial_action_id join user_associate ua on ua.associate_id = capa.associate_id where ca."year" = $1 and ua.user_id = $2 ` + (company != "0" ? ` and ua.associate_id = $3` : ``) + ` GROUP BY ca.year, capa.month ORDER BY ca.year, capa.month; `, company != "0" ? [year, user.id, company] : [year, user.id]);
         return result.rows;
       } else {
-        const result = await pool.query(`select ca.year, capa.month, SUM(capa.total_price) AS value FROM commercial_action_product_associate AS capa JOIN commercial_actions AS ca ON ca.id = capa.commercial_action_id join user_associate ua on ua.associate_id = capa.associate_id ` + (company != "0" ? ` where ua.associate_id = $1` : ``) + ` GROUP BY ca.year, capa.month ORDER BY ca.year, capa.month; `, company != "0" ? [company] : []);
+        const result = await pool.query(`select ca.year, capa.month, SUM(capa.total_price) AS value FROM commercial_action_product_associate AS capa JOIN commercial_actions AS ca ON ca.id = capa.commercial_action_id join user_associate ua on ua.associate_id = capa.associate_id ` + (company != "0" ? `where ua.associate_id = $1` : `where ua.user_id = $1`) + ` GROUP BY ca.year, capa.month ORDER BY ca.year, capa.month; `, company != "0" ? [company] : [user.id]);
         return result.rows;
       }
     } else if (user.type == 0 || user.type == 1) {

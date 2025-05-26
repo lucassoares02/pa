@@ -1,5 +1,6 @@
 const pool = require('../db');
 const userService = require('../services/userService');
+const { sendEmailSmtp } = require('../services/mailerService');
 
 
 // Get all users
@@ -16,10 +17,9 @@ exports.getAllUsers = async (req, res) => {
 // Create a new user
 exports.createUser = async (req, res) => {
     console.log("Create User");
-    const { id, name, email, type, associates } = req.body;
+    const { id, name, email, type, associates, link } = req.body;
     const password = req.body.password || null;
     try {
-        console.log("ID", id);
         if (id != null && id != "null") {
             const result = await userService.updateUser(id, name, email, type, associates);
             res.status(200).json(result);
@@ -28,7 +28,13 @@ exports.createUser = async (req, res) => {
                 const result = await userService.createUser(name, email, password);
                 res.status(201).json(result);
             } else {
-                const result = await userService.registerUser(name, email, type, associates);
+                const randomPassword = Math.random().toString(36).slice(-8);
+                const result = await userService.registerUser(name, email, type, associates, randomPassword);
+                const html = "<div><span>Olá @name, segue acesso a plataforma do associados.<br><br>Link: <a href='@link'>@link</a><br>E-mail: @email<br>Senha: @password<br>Atenciosamente - Equipe Multishow.</span></div>";
+                const replaceHtml = html.replaceAll("@name", name).replaceAll("@email", email).replaceAll("@password", randomPassword).replaceAll("@link", link);
+
+                await sendEmailSmtp(`"Portal Associados" <${process.env.MAIL_FROM}>`, email, "Cadastro de Usuário", "Seu cadastro foi realizado com sucesso", replaceHtml);
+
                 res.status(201).json(result);
             }
         }

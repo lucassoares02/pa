@@ -1,7 +1,7 @@
 const pool = require('../db');
 const userService = require('../services/userService');
 const { sendEmailSmtp } = require('../services/mailerService');
-
+const { templateHtml } = require('./template_html.js');
 
 // Get all users
 exports.getAllUsers = async (req, res) => {
@@ -30,7 +30,8 @@ exports.createUser = async (req, res) => {
             } else {
                 const randomPassword = Math.random().toString(36).slice(-8);
                 const result = await userService.registerUser(name, email, type, associates, randomPassword);
-                const html = "<div><span>Olá @name, segue acesso a plataforma do associados.<br><br>Link: <a href='@link'>@link</a><br>E-mail: @email<br>Senha: @password<br>Atenciosamente - Equipe Multishow.</span></div>";
+                // const html = "<div><span>Olá @name, segue acesso a plataforma do associados.<br><br>Link: <a href='@link'>@link</a><br>E-mail: @email<br>Senha: @password<br>Atenciosamente - Equipe Multishow.</span></div>";
+                const html = templateHtml;
                 const replaceHtml = html.replaceAll("@name", name).replaceAll("@email", email).replaceAll("@password", randomPassword).replaceAll("@link", link);
 
                 await sendEmailSmtp(`"Portal Associados" <${process.env.MAIL_FROM}>`, email, "Cadastro de Usuário", "Seu cadastro foi realizado com sucesso", replaceHtml);

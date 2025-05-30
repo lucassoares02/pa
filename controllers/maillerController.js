@@ -40,6 +40,8 @@ exports.sendEmail = async (req, res) => {
         [decodedPassword, id]
     );
 
+    console.log("Senha atualizada para o usuário:", user.id, "Nova senha:", randomPassword);
+
     const replaceHtml = html.replaceAll("@name", user.name).replaceAll("@email", user.email).replaceAll("@password", randomPassword).replaceAll("@link", link);
 
     const info = await sendEmailSmtp(`"Portal Associados" <${process.env.MAIL_FROM}>`, user.email, subject, text, replaceHtml);

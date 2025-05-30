@@ -17,19 +17,19 @@ exports.getAllUsers = async (req, res) => {
 // Create a new user
 exports.createUser = async (req, res) => {
     console.log("Create User");
-    const { id, name, email, type, associates, link } = req.body;
+    const { id, name, email, type, associates, link, active } = req.body;
     const password = req.body.password || null;
     try {
         if (id != null && id != "null") {
-            const result = await userService.updateUser(id, name, email, type, associates);
+            const result = await userService.updateUser(id, name, email, type, associates, active);
             res.status(200).json(result);
         } else {
             if (password != null) {
-                const result = await userService.createUser(name, email, password);
+                const result = await userService.createUser(name, email, password, active);
                 res.status(201).json(result);
             } else {
                 const randomPassword = Math.random().toString(36).slice(-8);
-                const result = await userService.registerUser(name, email, type, associates, randomPassword);
+                const result = await userService.registerUser(name, email, type, associates, randomPassword, active);
                 // const html = "<div><span>Olá @name, segue acesso a plataforma do associados.<br><br>Link: <a href='@link'>@link</a><br>E-mail: @email<br>Senha: @password<br>Atenciosamente - Equipe Multishow.</span></div>";
                 const html = templateHtml;
                 const replaceHtml = html.replaceAll("@name", name).replaceAll("@email", email).replaceAll("@password", randomPassword).replaceAll("@link", link);

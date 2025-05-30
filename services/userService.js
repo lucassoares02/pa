@@ -3,6 +3,7 @@ const { comparePassword, hashPassword } = require('../helpers/hash');
 
 const findUserByEmail = async (email) => {
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    console.log("Result", result);
     return result.rows[0];
 };
 
@@ -20,27 +21,28 @@ const validateLogin = async (email, password) => {
 
 
 const getAllUsers = async () => {
-    const result = await pool.query('SELECT * FROM users');
+    // const result = await pool.query('SELECT * FROM users');
+    const result = await pool.query(`SELECT u.*, string_agg(a.id::text, ' | ' ORDER BY a.id) AS associates FROM users u LEFT JOIN user_associate ua ON ua.user_id = u.id LEFT JOIN associates a ON a.id = ua.associate_id GROUP BY u.id`);
     return result.rows;
 };
 
-const createUser = async (name, email, password) => {
+const createUser = async (name, email, password, active) => {
 
     const hashedPassword = await hashPassword(password);
     const result = await pool.query(
-        'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *',
-        [name, email, hashedPassword]
+        'INSERT INTO users (name, email, password,active) VALUES ($1, $2, $3,$4) RETURNING *',
+        [name, email, hashedPassword,active]
     );
     return result.rows[0];
 };
 
-const registerUser = async (name, email, type, associates, randomPassword) => {
+const registerUser = async (name, email, type, associates, randomPassword, active) => {
 
-
+    console.log("Ative", active);
     const hashedPassword = await hashPassword(randomPassword);
     const result = await pool.query(
-        'INSERT INTO users (name, email, password, type) VALUES ($1, $2, $3, $4) RETURNING *',
-        [name, email, hashedPassword, type]
+        'INSERT INTO users (name, email, password, type, active) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [name, email, hashedPassword, type, active]
     );
     if (type == 2) {
         for (let i = 0; i < associates.length; i++) {
@@ -55,10 +57,11 @@ const registerUser = async (name, email, type, associates, randomPassword) => {
     return result.rows[0];
 };
 
-const updateUser = async (id, name, email, type, associates) => {
+const updateUser = async (id, name, email, type, associates, active) => {
+    console.log(`Active ${active}`);
     const result = await pool.query(
-        'UPDATE users SET name = $1, email = $2, type = $3 WHERE id = $4 RETURNING *',
-        [name, email, type, id]
+        'UPDATE users SET name = $1, email = $2, type = $3, active = $5 WHERE id = $4 RETURNING *',
+        [name, email, type, id, active]
     );
     if (type == 2) {
         await pool.query(

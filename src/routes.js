@@ -10,7 +10,7 @@ const authMiddleware = require('../src/middlewares/middleware');
 
 router.get('/', (req, res) => {
   res.send('API is running 🚀');
-});
+}); 
 
 
 router.post('/signin', login.signin);

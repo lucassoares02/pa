@@ -63,10 +63,10 @@ const createCommercialAction = async (req, res) => {
 const readCommercialActionDetails = async (req, res) => {
     console.log("Get Commercial Action Details");
 
-    const { id } = req.params;
+    const { id, associate } = req.params;
 
     try {
-        const result = await commercialService.readCommercial(id);
+        const result = await commercialService.readCommercial(id, associate);
         res.status(200).json(result);
     } catch (err) {
         console.error("Error getting commercial action: ", err);

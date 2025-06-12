@@ -27,9 +27,10 @@ const createCommercial = async (description, month, year) => {
 
 };
 
-const readCommercial = async (id) => {
+const readCommercial = async (id, associate) => {
   try {
-    const result = await pool.query("SELECT * FROM commercial_actions where id = $1", [id]);
+    // const result = await pool.query("SELECT * FROM commercial_actions where id = $1", [id]);
+    const result = await pool.query(`SELECT ca.*, ai.invoice, ai.observation FROM commercial_actions ca join additional_infos ai on ai."month" = ca."month" and ai."year" = ca."year" and ai.associate_id = $2 where ca.id = $1;`, [id, associate]);
     return result.rows;
   } catch (err) {
     console.error("Error reading commercial actions: ", err);
@@ -141,23 +142,27 @@ const readCommercialWithJoin = async (req) => {
 
   try {
     if (user.type == 2) {
-
+      console.log("STEP 1");
       if (month != null && month != "null" && year != null && year != "null" && month != "0" && year != "0" && month != 0 && year != 0) {
+        console.log("STEP 2");
         const result = await pool.query(`SELECT ca.id,ca.description, ua.associate_id as "associate_id", a.name as "associate_name", ca.month,COUNT(DISTINCT a.id) AS numberOfAssociates,COUNT(DISTINCT p.id) AS numberOfProducts,SUM(capa.total_price) AS totalValue, capa.associate_id, CASE WHEN COUNT(CASE WHEN capa.paid = true THEN 1 END) = 0 THEN 0 WHEN COUNT(CASE WHEN capa.paid = true THEN 1 END) = COUNT(capa.id) THEN 1 ELSE 2 END AS status_payment FROM commercial_actions ca JOIN commercial_action_product_associate capa ON capa.commercial_action_id = ca.id join user_associate ua on ua.associate_id = capa.associate_id JOIN associates a ON a.id = capa.associate_id JOIN products p ON p.id = capa.product_id WHERE ca.month = $1 AND ca.year = $2 and ua.user_id = $3 ` + (company != "0" ? ` and ua.associate_id = $4` : ``) + ` GROUP BY ca.id,capa.associate_id, ca.description,ua.associate_id, ca.month, a.name ORDER BY ca.month DESC`, company != "0" ? [month, year, user.id, company] : [month, year, user.id]);
         return result.rows;
 
       } else {
-        const result = await pool.query(`SELECT ca.id,ca.description, ua.associate_id as "associate_id", a.name as "associate_name", ca.month,COUNT(DISTINCT a.id) AS numberOfAssociates,COUNT(DISTINCT p.id) AS numberOfProducts,SUM(capa.total_price) AS totalValue,capa.associate_id, CASE WHEN COUNT(CASE WHEN capa.paid = true THEN 1 END) = 0 THEN 0 WHEN COUNT(CASE WHEN capa.paid = true THEN 1 END) = COUNT(capa.id) THEN 1 ELSE 2 END AS status_payment FROM commercial_actions ca JOIN commercial_action_product_associate capa ON capa.commercial_action_id = ca.id join user_associate ua on ua.associate_id = capa.associate_id JOIN associates a ON a.id = capa.associate_id JOIN products p ON p.id = capa.product_id where ua.user_id = $1 ` + (company != "0" ? ` and ua.associate_id = $2` : ``) + ` GROUP BY ca.id, ca.description,capa.associate_id, ua.associate_id, ca.month, a.name ORDER BY ca.month DESC;`, company != "0" ? [user.id, company] : [user.id]);
+        console.log("STEP 3");
+        const result = await pool.query(`SELECT ca.id,ca.description, ua.associate_id as "associate_id", a.name as "associate_name", ca.month,COUNT(DISTINCT a.id) AS numberOfAssociates, ai.observation, ai.invoice, ai.payment_type, ai."month", COUNT(DISTINCT p.id) AS numberOfProducts,SUM(capa.total_price) AS totalValue,capa.associate_id, CASE WHEN COUNT(CASE WHEN capa.paid = true THEN 1 END) = 0 THEN 0 WHEN COUNT(CASE WHEN capa.paid = true THEN 1 END) = COUNT(capa.id) THEN 1 ELSE 2 END AS status_payment FROM commercial_actions ca JOIN commercial_action_product_associate capa ON capa.commercial_action_id = ca.id join user_associate ua on ua.associate_id = capa.associate_id JOIN associates a ON a.id = capa.associate_id join additional_infos ai ON ai.associate_id = ua.associate_id JOIN products p ON p.id = capa.product_id where ua.user_id = $1 ` + (company != "0" ? ` and ua.associate_id = $2` : ``) + ` GROUP BY ca.id, ca.description,capa.associate_id, ua.associate_id, ca.month, a.name, ai.id ORDER BY ca.month DESC;`, company != "0" ? [user.id, company] : [user.id]);
         return result.rows;
       }
 
     } else if (user.type == 0 || user.type == 1) {
-
+      console.log("STEP 4");
       if (month != null && month != "null" && year != null && year != "null" && month != "0" && year != "0" && month != 0 && year != 0) {
+        console.log("STEP 5");
         const result = await pool.query("SELECT ca.id,ca.description,ca.month,COUNT(DISTINCT a.id) AS numberOfAssociates,COUNT(DISTINCT p.id) AS numberOfProducts,SUM(capa.total_price) AS totalValue FROM commercial_actions ca JOIN commercial_action_product_associate capa ON capa.commercial_action_id = ca.id JOIN associates a ON a.id = capa.associate_id JOIN products p ON p.id = capa.product_id WHERE ca.month = $1 AND ca.year = $2 GROUP BY ca.id, ca.description, ca.month ORDER BY ca.month DESC;", [month, year]);
         return result.rows;
 
       } else {
+        console.log("STEP 6");
         const result = await pool.query("SELECT ca.id,ca.description,ca.month,COUNT(DISTINCT a.id) AS numberOfAssociates,COUNT(DISTINCT p.id) AS numberOfProducts,SUM(capa.total_price) AS totalValue FROM commercial_actions ca JOIN commercial_action_product_associate capa ON capa.commercial_action_id = ca.id JOIN associates a ON a.id = capa.associate_id JOIN products p ON p.id = capa.product_id GROUP BY ca.id, ca.description, ca.month ORDER BY ca.month DESC;");
         return result.rows;
       }

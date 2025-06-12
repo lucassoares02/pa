@@ -25,7 +25,7 @@ router.post('/commercial-action', authMiddleware, commercial.createCommercialAct
 router.get('/commercial-actions', authMiddleware, commercial.readCommercialActions);
 router.get('/available-months/:year/:company', authMiddleware, commercial.readAvailableMonhts);
 router.get('/available-years/:company', authMiddleware, commercial.readAvailableYear);
-router.get('/commercial-actions/:id', authMiddleware, commercial.readCommercialActionDetails);
+router.get('/commercial-actions/:id/:associate', authMiddleware, commercial.readCommercialActionDetails);
 router.get('/commercial-actions-with-join/:month/:year/:company', authMiddleware, commercial.readCommercialActionsWithJoin);
 router.get('/commercial-action-associates/:id', authMiddleware, commercial.readCommercialActionAssociates);
 router.get('/commercial-action-products/:action', authMiddleware, commercial.readCommercialActionProducts);

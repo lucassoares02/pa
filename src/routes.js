@@ -5,12 +5,14 @@ const login = require('../controllers/loginController');
 const commercial = require('../controllers/commercialController');
 const payments = require('../controllers/paymentsController');
 const mailer = require('../controllers/maillerController');
+const file = require('../controllers/fileController');
 const authMiddleware = require('../src/middlewares/middleware');
-
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.get('/', (req, res) => {
   res.send('API is running 🚀');
-}); 
+});
 
 
 router.post('/signin', login.signin);
@@ -43,6 +45,7 @@ router.get('/payments-financial-summary-graph/:year/:company', authMiddleware, p
 
 router.post('/send-email', mailer.sendEmail);
 
+router.post('/upload-excel', upload.single('file'), file.import);
 
 module.exports = router;
 ''

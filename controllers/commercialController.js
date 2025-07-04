@@ -16,21 +16,40 @@ const createCommercialAction = async (req, res) => {
             const response = await commercialService.createCommercial(descriptionAction, month, year);
             result.push(response);
 
+            console.log("Step 1");
+
             for (const associate of item.client) {
 
                 const { document, client, products } = associate;
 
+                console.log("Step 2");
+                console.log(document);
+                console.log(client);
+
+
                 const responseAssociate = await associateService.createAssociate(document, client);
                 result.push(responseAssociate);
 
+                console.log("Step 2.5");
+
+                console.log("Products: ", products);
+
                 const responseProducts = await productService.createMultiplesProducts(products);
                 result.push(responseProducts);
+
+                console.log("Step 3");
+
 
                 let commercials = [];
 
                 for (const prod of products) {
 
+                    console.log("Step 4");
+
+
                     const productFound = responseProducts.find(p => p.sku === prod.id);
+
+                    console.log(productFound);
 
                     commercials.push({
                         quantity: prod.quantity,
@@ -44,9 +63,16 @@ const createCommercialAction = async (req, res) => {
                         associate_id: responseAssociate.id,
                         commercial_action_id: response.id
                     });
+
+                    console.log("Step 5");
+
                 }
 
+                console.log("Step 6");
+
                 const responseActions = await commercialActionProductAssociateService.createMultiplesActions(commercials);
+                console.log(responseActions);
+                console.log("Step 7");
                 result.push(responseActions);
             }
             console.log("Finished Action: ", descriptionAction);

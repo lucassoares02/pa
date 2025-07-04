@@ -47,15 +47,18 @@ const createMultiplesProducts = async (products) => {
       INSERT INTO products (sku, name)
       SELECT sku, name FROM new_products
       WHERE NOT EXISTS (
-        SELECT 1 FROM products p WHERE p.sku = new_products.sku AND p.name = new_products.name
+        SELECT 1 FROM products p WHERE p.sku = new_products.sku
       )
       RETURNING *
     )
     SELECT * FROM ins
     UNION
     SELECT p.* FROM products p
-    JOIN new_products np ON p.sku = np.sku AND p.name = np.name;
+    JOIN new_products np ON p.sku = np.sku;
   `;
+
+
+  console.log("Executing query:", query);
 
 
 

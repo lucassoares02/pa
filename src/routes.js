@@ -1,51 +1,50 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const user = require('../controllers/userController');
-const login = require('../controllers/loginController');
-const commercial = require('../controllers/commercialController');
-const payments = require('../controllers/paymentsController');
-const mailer = require('../controllers/maillerController');
-const file = require('../controllers/fileController');
-const authMiddleware = require('../src/middlewares/middleware');
-const multer = require('multer');
+const user = require("../controllers/userController");
+const login = require("../controllers/loginController");
+const commercial = require("../controllers/commercialController");
+const payments = require("../controllers/paymentsController");
+const mailer = require("../controllers/maillerController");
+const file = require("../controllers/fileController");
+const authMiddleware = require("../src/middlewares/middleware");
+const multer = require("multer");
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.get('/', (req, res) => {
-  res.send('API is running 🚀');
+router.get("/", (req, res) => {
+  res.send("API is running 🚀");
 });
 
-
-router.post('/signin', login.signin);
+router.post("/signin", login.signin);
 
 // USER
-router.get('/users', authMiddleware, user.getAllUsers);
-router.get('/associates/:user_id', authMiddleware, user.getAssociateByUser);
-router.post('/users', authMiddleware, user.createUser);
+router.get("/users", authMiddleware, user.getAllUsers);
+router.get("/associates/:user_id", authMiddleware, user.getAssociateByUser);
+router.post("/users", authMiddleware, user.createUser);
 
 // COMMERCIAL ACTIONS
-router.post('/commercial-action', authMiddleware, commercial.createCommercialAction);
-router.get('/commercial-actions', authMiddleware, commercial.readCommercialActions);
-router.get('/available-months/:year/:company', authMiddleware, commercial.readAvailableMonhts);
-router.get('/available-years/:company', authMiddleware, commercial.readAvailableYear);
-router.get('/commercial-actions/:id/:associate', authMiddleware, commercial.readCommercialActionDetails);
-router.get('/commercial-actions-with-join/:month/:year/:company', authMiddleware, commercial.readCommercialActionsWithJoin);
-router.get('/commercial-action-associates/:id', authMiddleware, commercial.readCommercialActionAssociates);
-router.get('/commercial-action-products/:action', authMiddleware, commercial.readCommercialActionProducts);
-router.get('/commercial-actions-top-associates/:year', authMiddleware, commercial.readTopAssociates);
+router.post("/commercial-action", authMiddleware, commercial.createCommercialAction);
+router.get("/commercial-actions", authMiddleware, commercial.readCommercialActions);
+router.get("/available-months/:year/:company", authMiddleware, commercial.readAvailableMonhts);
+router.get("/available-years/:company", authMiddleware, commercial.readAvailableYear);
+router.get("/commercial-actions/:id/:associate", authMiddleware, commercial.readCommercialActionDetails);
+router.get("/commercial-actions-with-join/:month/:year/:company", authMiddleware, commercial.readCommercialActionsWithJoin);
+router.get("/commercial-action-associates/:id", authMiddleware, commercial.readCommercialActionAssociates);
+router.get("/commercial-action-products/:action", authMiddleware, commercial.readCommercialActionProducts);
+router.get("/commercial-actions-top-associates/:year", authMiddleware, commercial.readTopAssociates);
 
-// PAYMENTS 
-router.get('/payments-associates/:month/:year', authMiddleware, payments.readPaymentsAssociates);
-router.put('/payments-associate/:associate/:invoice', authMiddleware, payments.updatePaymentsAssociate);
-router.post('/payments-associate-additional-info', authMiddleware, payments.createPaymentsInvoiceAssociate);
-router.put('/payments-associate/:associate/:invoice/:oldInvoice', authMiddleware, payments.updatePaymentsInvoiceAssociate);
-router.get('/payments-actions/:associate/:month/:year', authMiddleware, payments.readPaymentsActions);
-router.get('/payments-action-products/:associate/:action', authMiddleware, payments.readPaymentsActionsProducts);
-router.get('/payments-financial-summary/:month/:year/:company', authMiddleware, payments.readFinancialSummary);
-router.get('/payments-financial-summary-graph/:year/:company', authMiddleware, payments.readFinancialSummaryGraph);
+// PAYMENTS
+router.get("/payments-associates/:month/:year", authMiddleware, payments.readPaymentsAssociates);
+router.put("/payments-associate/:associate/:invoice", authMiddleware, payments.updatePaymentsAssociate);
+router.post("/payments-associate-additional-info", authMiddleware, payments.createPaymentsInvoiceAssociate);
+router.put("/payments-associate/:associate/:invoice/:oldInvoice", authMiddleware, payments.updatePaymentsInvoiceAssociate);
+router.get("/payments-actions/:associate/:month/:year", authMiddleware, payments.readPaymentsActions);
+router.get("/payments-action-products/:associate/:action", authMiddleware, payments.readPaymentsActionsProducts);
+router.get("/payments-financial-summary/:month/:year/:company", authMiddleware, payments.readFinancialSummary);
+router.get("/payments-financial-summary-graph/:year/:company", authMiddleware, payments.readFinancialSummaryGraph);
 
-router.post('/send-email', mailer.sendEmail);
+router.post("/send-email", mailer.sendEmail);
 
-router.post('/upload-excel', upload.single('file'), file.import);
+router.post("/upload-excel", upload.single("file"), file.import);
 
 module.exports = router;
-''
+("");

@@ -1,8 +1,7 @@
-
-const dotenv = require('dotenv');
-const pool = require('../db');
-const { hashPassword } = require('../helpers/hash');
-const { sendEmailSmtp } = require('../services/mailerService');
+const dotenv = require("dotenv");
+const pool = require("../db");
+const { hashPassword } = require("../helpers/hash");
+const { sendEmailSmtp } = require("../services/mailerService");
 
 dotenv.config(); // carrega variáveis de .env
 
@@ -15,37 +14,36 @@ dotenv.config(); // carrega variáveis de .env
  * @param {string}          [text]  Conteúdo em texto puro (fallback).
  */
 exports.sendEmail = async (req, res) => {
+  const { id, subject, html, text, link, email } = req.body;
 
-    const { id, subject, html, text, link, email } = req.body;
+  user = null;
 
-    user = null;
+  if (id != null && id != "null") {
+    const result = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
+    user = result.rows[0];
+  } else if (email != null && email != "null") {
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    user = result.rows[0];
+  }
 
-    if (id != null && id != "null") {
-        const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
-        user = result.rows[0];
-    } else if (email != null && email != "null") {
-        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-        user = result.rows[0];
-    }
+  if (!user) {
+    return res.status(404).json({ error: "Usuário não encontrado" });
+  }
 
+  const randomPassword = Math.random().toString(36).slice(-8);
+  const decodedPassword = await hashPassword(randomPassword);
+  await pool.query("UPDATE users SET password = $1 WHERE id = $2 RETURNING *", [decodedPassword, id]);
 
-    if (!user) {
-        return res.status(404).json({ error: 'Usuário não encontrado' });
-    }
+  console.log("Senha atualizada para o usuário:", user.id, "Nova senha:", randomPassword);
 
-    const randomPassword = Math.random().toString(36).slice(-8);
-    const decodedPassword = await hashPassword(randomPassword);
-    await pool.query(
-        'UPDATE users SET password = $1 WHERE id = $2 RETURNING *',
-        [decodedPassword, id]
-    );
+  const replaceHtml = html
+    .replaceAll("@name", user.name)
+    .replaceAll("@email", user.email)
+    .replaceAll("@password", randomPassword)
+    .replaceAll("@link", link);
 
-    console.log("Senha atualizada para o usuário:", user.id, "Nova senha:", randomPassword);
+  const info = await sendEmailSmtp(`"Portal Associados" <${process.env.MAIL_FROM}>`, user.email, subject, text, replaceHtml);
 
-    const replaceHtml = html.replaceAll("@name", user.name).replaceAll("@email", user.email).replaceAll("@password", randomPassword).replaceAll("@link", link);
-
-    const info = await sendEmailSmtp(`"Portal Associados" <${process.env.MAIL_FROM}>`, user.email, subject, text, replaceHtml);
-
-    console.log('E-mail enviado:', info.messageId);
-    return res.status(200).json({ message: 'E-mail enviado com sucesso', messageId: info.messageId });
-}
+  console.log("E-mail enviado:", info.messageId);
+  return res.status(200).json({ message: "E-mail enviado com sucesso", messageId: info.messageId });
+};

@@ -1,4 +1,3 @@
-
 const templateHtml = `<!DOCTYPE html>
 <html>
 
@@ -238,10 +237,6 @@ const templateHtml = `<!DOCTYPE html>
                     <span class="data-label">E-mail:</span>
                     <span class="data-value">@email</span>
                 </div>
-                <div class="data-item">
-                    <span class="data-label">Senha:</span>
-                    <span class="data-value">@password</span>
-                </div>
             </div>
 
             <p class="message">Acesse a plataforma através do botão abaixo:</p>
@@ -270,6 +265,6 @@ const templateHtml = `<!DOCTYPE html>
     </div>
 </body>
 
-</html>`
+</html>`;
 
 module.exports = { templateHtml };
